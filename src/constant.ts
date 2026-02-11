@@ -12,12 +12,12 @@ export const LATEST_BLOCK = process.env.LATEST_BLOCK || '0';
 export const MODE = process.env.MODE || 'Full';
 
 export const CustomType = {
-      "CommitteeId": "u32",
-      "BindingType": {
-        "_enum": {
-          "None": null,
-          "Master": "CommitteeId",
-          "Slave": "Vec<CommitteeId>"
-        }
-      }
-}
+  CommitteeId: 'u32',
+  BindingType: {
+    _enum: {
+      None: null,
+      Master: 'CommitteeId',
+      Slave: 'Vec<CommitteeId>'
+    }
+  }
+};

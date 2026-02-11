@@ -12,7 +12,7 @@ export enum ChainType {
   TON = 'Ton',
   NEAR = 'Near',
   TRON = 'Tron',
-  CKB = "Ckb"
+  CKB = 'Ckb'
 }
 
 export interface UncheckParams {
@@ -97,12 +97,16 @@ const toChainType = (type: number): ChainType => {
     return ChainType.TRON;
   } else if (type == 13) {
     return ChainType.CKB;
-  }else {
+  } else {
     return ChainType.RAW;
   }
 };
 
-export const toUncheckParam = (tx: any, hash: Uint8Array, slave_sigs: Array<Array<number>>): UncheckParams => {
+export const toUncheckParam = (
+  tx: any,
+  hash: Uint8Array,
+  slave_sigs: Array<Array<number>>
+): UncheckParams => {
   const uk: UncheckParams = {
     cid: parseInt(tx.cid.toString()),
     uid: Array.from(tx.txsource.uid),

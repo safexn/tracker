@@ -14,7 +14,7 @@ const test = async () => {
   let tx: any = await api.query.channel.txMessages(cid, hashU8);
   console.log(JSON.stringify(tx));
 
-  let slave_sigs: Array<Array<number>> = new Array();
+  let slave_sigs: Array<Array<number>> = [];
   let bindingType: any = await api.query.channel.committeeBindingInfo(cid);
   // Handle the BindingType enum
   if (bindingType.isSlave) {
@@ -38,7 +38,7 @@ const showConfig = () => {
   );
 };
 
-let main = async () => {
+const main = async () => {
   server();
   showConfig();
   // test();

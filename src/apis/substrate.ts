@@ -19,7 +19,7 @@ export const getDefaultApi = async (): Promise<ApiPromise> => {
   return api;
 };
 
-export const toKeyPair = (privateKey: String): KeyringPair => {
+export const toKeyPair = (privateKey: string): KeyringPair => {
   const keyring = createTestKeyring();
   const keyPair = keyring.addFromSeed(hexToU8a(privateKey), undefined, 'ethereum');
   return keyPair;
@@ -28,7 +28,7 @@ export const toKeyPair = (privateKey: String): KeyringPair => {
 export const isDroppedTransaction = async (
   api: ApiPromise,
   cid: number,
-  hash: String
+  hash: string
 ): Promise<boolean> => {
   let tx: any = await api.query.channel.txMessages(cid, hash);
   // Drop type is 3
@@ -39,8 +39,8 @@ export const triggerAndWatch = async (
   api: ApiPromise,
   keyPair: KeyringPair,
   cid: number,
-  hash: String
-): Promise<String> => {
+  hash: string
+): Promise<string> => {
   let doWithListener = (seed: any, call: any) => {
     return new Promise(function (resolve, reject) {
       call

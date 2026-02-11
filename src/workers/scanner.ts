@@ -43,7 +43,7 @@ interface ScanResult {
   sbts: UncheckParams[];
 }
 
-let subScan = async (
+const subScan = async (
   api: ApiPromise,
   tag: string,
   from: number,
@@ -59,7 +59,7 @@ let subScan = async (
     let hash = await api.rpc.chain.getBlockHash(i);
     // console.log(`hash: ${hash}`);
     let events = await api.query.system.events.at(hash);
-    for (let record of events) {
+    for (const record of events) {
       const { event, phase } = record;
       if (event.method === 'NewTransaction') {
         let nst: NeedSignedTransaction = {
@@ -98,7 +98,7 @@ let subScan = async (
   return result;
 };
 
-let resend = async (
+const resend = async (
   api: ApiPromise,
   tag: string,
   keyPair: KeyringPair,

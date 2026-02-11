@@ -2,7 +2,7 @@ import axios from 'axios';
 import { MONITOR_URL } from '../constant';
 import { UncheckParams } from '../types';
 
-export const postUncheckTransaction = async (param: UncheckParams): Promise<String> => {
+export const postUncheckTransaction = async (param: UncheckParams): Promise<string> => {
   const instance = axios.create({
     baseURL: MONITOR_URL,
     timeout: 3000,

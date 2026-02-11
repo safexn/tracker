@@ -95,7 +95,7 @@ const query = async (api: ApiPromise, latest: number, context: Context): Promise
   for (let i = beginHeight; i < endHeight; i++) {
     let blockHash = await api.rpc.chain.getBlockHash(i);
     let events = await api.query.system.events.at(blockHash);
-    for (let record of events) {
+    for (const record of events) {
       const { event } = record;
       if (event.method === 'SubmitTransaction' || event.method === 'SubmitTransactionSignResult') {
         let cid = event.data[0];
