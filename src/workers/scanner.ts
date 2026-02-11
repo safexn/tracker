@@ -1,6 +1,6 @@
 import { ApiPromise } from '@polkadot/api';
 import { expose } from 'threads/worker';
-import { NeedSignedTransaction, ScanTask, TaskType, UncheckParams, toUncheckParam } from '../types';
+import { NeedSignedTransaction, ScanTask, TaskType, UncheckParams } from '../types';
 import {
   getDefaultApi,
   isDroppedTransaction,
@@ -11,6 +11,7 @@ import {
 import { KeyringPair } from '@polkadot/keyring/types';
 import crypto from 'crypto';
 import { SCANNER_KEY } from '../constant';
+import { queryUncheckParams } from '../query';
 
 function getHash(data: object): string {
   const hash = crypto.createHash('sha256');
@@ -83,8 +84,7 @@ let subScan = async (
         let cid = event.data[0];
         if (cids == undefined || (cids != undefined && cids.includes(cid.toNumber()))) {
           let hash = event.data[3];
-          let tx: any = await api.query.channel.txMessages(cid, hash);
-          let params = toUncheckParam(tx, hash.toU8a());
+          let params = await queryUncheckParams(api, cid, hash.toString());
           sbts.push(params);
         }
       }

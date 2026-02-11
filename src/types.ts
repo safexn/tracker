@@ -20,6 +20,7 @@ export interface UncheckParams {
   uid: Array<number>;
   msg: Array<number>;
   sig: Array<number>;
+  slave_sigs: Array<Array<number>>;
   hash: Array<number>;
   chain_type: string;
   source_hash: Array<number>;
@@ -67,6 +68,8 @@ export interface RequestRepair {
   type: TaskType;
 }
 
+export type CommitteeId = string; // or number, depending on your use case
+
 const toChainType = (type: number): ChainType => {
   if (type == 4) {
     return ChainType.ETH;
@@ -99,12 +102,13 @@ const toChainType = (type: number): ChainType => {
   }
 };
 
-export const toUncheckParam = (tx: any, hash: Uint8Array): UncheckParams => {
+export const toUncheckParam = (tx: any, hash: Uint8Array, slave_sigs: Array<Array<number>>): UncheckParams => {
   const uk: UncheckParams = {
     cid: parseInt(tx.cid.toString()),
     uid: Array.from(tx.txsource.uid),
     msg: Array.from(tx.msg),
     sig: Array.from(tx.signature),
+    slave_sigs: slave_sigs,
     hash: Array.from(hash),
     chain_type: toChainType(tx.txsource.chainType.toNumber()),
     source_hash: Array.from([0])

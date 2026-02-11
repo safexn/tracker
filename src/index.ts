@@ -4,16 +4,27 @@ import { spawn, Thread, Worker } from 'threads';
 import { ScanTask, toUncheckParam } from './types';
 import { server } from './server';
 import { MONITOR_URL, SCANNER_KEY, SUBSCRIBE_KEY, CHAIN_WS_URL, MODE } from './constant';
+import { CommitteeId } from './types';
 
 const test = async () => {
   let api = await getDefaultApi();
-  let cid = 216;
-  let hash = '0x8aaed765012c15109812d050890209c40107fa5761f38c9de3c448a97a5e155e';
+  let cid = 10;
+  let hash = '0x06e215575dcccdeae13e3d79b52285f642559bcd846a8b0007b3ddd0bbe1efd2';
   let hashU8 = hexToU8a(hash);
   let tx: any = await api.query.channel.txMessages(cid, hashU8);
   console.log(JSON.stringify(tx));
-  let params = toUncheckParam(tx, hashU8);
-  console.log(params.toString());
+
+  let slave_sigs: Array<Array<number>> = new Array();
+  let bindingType: any = await api.query.channel.committeeBindingInfo(cid);
+  // Handle the BindingType enum
+  if (bindingType.isSlave) {
+    const slaveIds = bindingType.asSlave.map((id: CommitteeId) => id);
+    for (const id of slaveIds) {
+      let slave_tx: any = await api.query.channel.slaveMessages(id, hashU8);
+      slave_sigs.push(Array.from(slave_tx.signature));
+    }
+  }
+  let params = toUncheckParam(tx, hashU8, slave_sigs);
   console.log(JSON.stringify(params));
   let result = await postUncheckTransaction(params);
   console.log(result);

@@ -1,9 +1,9 @@
 import express from 'express';
 import { spawn, Thread, Worker } from 'threads';
-import { ScanTask, TaskType, toUncheckParam } from './types';
+import { ScanTask, TaskType } from './types';
 import { SCANNER_KEY } from './constant';
 import { getDefaultApi, postUncheckTransaction, toKeyPair, triggerAndWatch } from './apis';
-import { hexToU8a } from '@polkadot/util';
+import { queryUncheckParams } from './query';
 
 const app = express();
 app.use(express.json());
@@ -50,8 +50,7 @@ app.post('/repair', async (req, res) => {
         res.status(200).send(v);
       });
     } else if ((req.body.type = 'Submit')) {
-      let tx: any = await api.query.channel.txMessages(cid, hash);
-      let params = toUncheckParam(tx, hexToU8a(hash));
+      let params = await queryUncheckParams(api, cid, hash);
       await postUncheckTransaction(params).then((v) => {
         res.status(200).send(v);
       });

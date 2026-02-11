@@ -1,5 +1,5 @@
 import { ApiPromise } from '@polkadot/api';
-import { RecordItem, toUncheckParam } from '../types';
+import { RecordItem } from '../types';
 import {
   getDefaultApi,
   isDroppedTransaction,
@@ -10,6 +10,7 @@ import {
 import { expose } from 'threads/worker';
 import { KeyringPair } from '@polkadot/keyring/types';
 import { LATEST_BLOCK, SUBSCRIBE_KEY, DELAY_BLOCKS } from '../constant';
+import { queryUncheckParams } from '../query';
 
 // 11 minute
 const EXPIRED_TIME = 11 * 60 * 1000;
@@ -99,8 +100,7 @@ const query = async (api: ApiPromise, latest: number, context: Context): Promise
       if (event.method === 'SubmitTransaction' || event.method === 'SubmitTransactionSignResult') {
         let cid = event.data[0];
         let hash = event.data[3];
-        let tx: any = await api.query.channel.txMessages(cid, hash);
-        let params = toUncheckParam(tx, hash.toU8a());
+        let params = await queryUncheckParams(api, cid, hash.toString());
         let result = await postUncheckTransaction(params);
         console.log('monitor :', result);
         if (context.state.delete(hash.toString())) {
