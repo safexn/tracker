@@ -1,6 +1,6 @@
 {
-	"name": "bnk-tracker",
-	"version": "2.0.6",
+	"name": "sxn-tracker",
+	"version": "2.1.0",
 	"main": "index.js",
 	"license": "MIT",
 	"scripts": {
