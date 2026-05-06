@@ -13,6 +13,8 @@ import crypto from 'crypto';
 import { SCANNER_KEY } from '../constant';
 import { queryUncheckParams } from '../query';
 
+const MAX_PARALLEL_TRIGGER = 8;
+
 function getHash(data: object): string {
   const hash = crypto.createHash('sha256');
   hash.update(JSON.stringify(data));
@@ -59,7 +61,8 @@ const subScan = async (
     let hash = await api.rpc.chain.getBlockHash(i);
     // console.log(`hash: ${hash}`);
     let events = await api.query.system.events.at(hash);
-    for (const record of events) {
+    const eventRecords: any[] = events as any;
+    for (const record of eventRecords) {
       const { event, phase } = record;
       if (event.method === 'NewTransaction') {
         let nst: NeedSignedTransaction = {
@@ -107,10 +110,10 @@ const resend = async (
 ) => {
   if (taskType == TaskType.New || taskType == TaskType.All) {
     console.log(`${tag} do New, ${result.nsts.length}`);
-    for (const nst of result.nsts) {
-      let result = await triggerAndWatch(api, keyPair, nst.cid, nst.hash);
-      console.log(`${tag} ${result}`);
-    }
+    await runWithConcurrency(result.nsts, MAX_PARALLEL_TRIGGER, async (nst) => {
+      let sendResult = await triggerAndWatch(api, keyPair, nst.cid, nst.hash);
+      console.log(`${tag} ${sendResult}`);
+    });
   }
 
   if (taskType == TaskType.Submit || taskType == TaskType.All) {
@@ -120,6 +123,37 @@ const resend = async (
       console.log(`${tag} ${result}`);
     }
   }
+};
+
+const runWithConcurrency = async <T>(
+  items: T[],
+  limit: number,
+  handler: (item: T) => Promise<void>
+): Promise<void> => {
+  if (items.length == 0) {
+    return;
+  }
+
+  let cursor = 0;
+  const workerCount = Math.min(limit, items.length);
+  const workers: Promise<void>[] = [];
+
+  const runOne = async (): Promise<void> => {
+    while (true) {
+      const index = cursor;
+      cursor++;
+      if (index >= items.length) {
+        return;
+      }
+      await handler(items[index]);
+    }
+  };
+
+  for (let i = 0; i < workerCount; i++) {
+    workers.push(runOne());
+  }
+
+  await Promise.all(workers);
 };
 
 expose(scan);

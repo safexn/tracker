@@ -95,7 +95,8 @@ const query = async (api: ApiPromise, latest: number, context: Context): Promise
   for (let i = beginHeight; i < endHeight; i++) {
     let blockHash = await api.rpc.chain.getBlockHash(i);
     let events = await api.query.system.events.at(blockHash);
-    for (const record of events) {
+    const eventRecords: any[] = events as any;
+    for (const record of eventRecords) {
       const { event } = record;
       if (event.method === 'SubmitTransaction' || event.method === 'SubmitTransactionSignResult') {
         let cid = event.data[0];
@@ -133,17 +134,23 @@ const check = async (api: ApiPromise, context: Context): Promise<void> => {
   const now = new Date().getTime();
 
   let drop: string[] = [];
-  context.state.forEach(async (item) => {
+  for (const item of context.state.values()) {
     if (isOutdate(now, item.timestamp)) {
       if (await isDroppedTransaction(api, item.cid, item.hash)) {
         context.curious++;
         console.log(`${context.keyPair.address} try repair [${item.cid}, ${item.hash}]`);
-        let result = await triggerAndWatch(api, context.keyPair, item.cid, item.hash);
-        console.log(`${context.keyPair.address} repair [${item.cid}, ${item.hash}], ${result}`);
+        try {
+          let result = await triggerAndWatch(api, context.keyPair, item.cid, item.hash);
+          console.log(`${context.keyPair.address} repair [${item.cid}, ${item.hash}], ${result}`);
+          drop.push(item.hash);
+        } catch (err) {
+          console.log(`${context.keyPair.address} repair failed [${item.cid}, ${item.hash}], ${err}`);
+        }
+      } else {
+        drop.push(item.hash);
       }
-      drop.push(item.hash);
     }
-  });
+  }
 
   drop.forEach((key) => {
     context.state.delete(key);
